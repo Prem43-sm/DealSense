@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --primary: 173 80% 32%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 9% 38%;
+    --accent: 39 92% 55%;
+    --accent-foreground: 222 47% 11%;
+    --border: 220 13% 88%;
+    --input: 220 13% 88%;
+    --ring: 173 80% 32%;
+    --success: 149 70% 35%;
+    --warning: 39 92% 50%;
+    --shadow: 222 47% 11%;
+  }
+
+  .dark {
+    --background: 220 35% 7%;
+    --foreground: 210 40% 96%;
+    --card: 220 30% 10%;
+    --card-foreground: 210 40% 96%;
+    --primary: 173 74% 44%;
+    --primary-foreground: 220 35% 7%;
+    --secondary: 220 25% 15%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 220 22% 16%;
+    --muted-foreground: 220 10% 68%;
+    --accent: 39 92% 60%;
+    --accent-foreground: 222 47% 11%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 173 74% 44%;
+    --success: 149 75% 45%;
+    --warning: 39 92% 60%;
+    --shadow: 0 0% 0%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply border bg-card text-card-foreground shadow-soft;
+  }
+
+  .section {
+    @apply py-12 md:py-16;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.12em] text-primary;
+  }
+
+  .prose {
+    @apply text-muted-foreground;
+  }
+
+  .prose h2 {
+    @apply mt-8 text-2xl font-bold text-foreground;
+  }
+
+  .prose p {
+    @apply mt-4 leading-7;
+  }
+
+  .prose a {
+    @apply font-semibold text-primary underline-offset-4 hover:underline;
+  }
+}
