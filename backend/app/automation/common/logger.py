@@ -1,8 +1,23 @@
 import logging
 from pathlib import Path
+from typing import Any
 
 
 LOG_DIR = Path(__file__).resolve().parents[1] / "logs"
+
+
+class AgentLogFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        base = super().format(record)
+        extra: dict[str, Any] = {
+            key.removeprefix("_"): value
+            for key, value in record.__dict__.items()
+            if key.startswith("_")
+        }
+        if not extra:
+            return base
+        details = " ".join(f"{key}={value}" for key, value in extra.items())
+        return f"{base} {details}"
 
 
 def get_agent_logger(agent_name: str, level: str = "INFO") -> logging.Logger:
@@ -20,8 +35,7 @@ def get_agent_logger(agent_name: str, level: str = "INFO") -> logging.Logger:
     }
     if str(log_path) not in existing_paths:
         handler = logging.FileHandler(log_path, encoding="utf-8")
-        handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+        handler.setFormatter(AgentLogFormatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
         logger.addHandler(handler)
 
     return logger
-

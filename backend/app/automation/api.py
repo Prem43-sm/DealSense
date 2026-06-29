@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 
+from app.automation.common.scheduler import AutomationScheduler
 from app.automation.services.health_service import HealthService, get_health_service
 
 router = APIRouter(prefix="/automation", tags=["automation"])
@@ -11,3 +12,11 @@ def automation_status(
 ) -> dict[str, object]:
     return health_service.status()
 
+
+@router.get("/product-discovery/run")
+def run_product_discovery() -> dict[str, object]:
+    scheduler = AutomationScheduler()
+    agents = scheduler.register_all_agents()
+    product_discovery = next(agent for agent in agents if agent.name == "product_discovery")
+    summary = product_discovery.run()
+    return {"status": "success", "summary": summary.model_dump()}
