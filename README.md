@@ -29,6 +29,7 @@ DealSense is a production-ready affiliate deal and price comparison website buil
 - lucide-react icons
 - next-themes
 - PostgreSQL via `pg`
+- FastAPI backend in `backend/`
 
 ## Getting Started
 
@@ -135,6 +136,27 @@ The PostgreSQL schema lives in `db/schema.sql` and includes:
 - price_history
 - blog_posts
 - saved_products
+
+## Backend Phase 1
+
+The FastAPI price tracking backend lives in `backend/`.
+
+```bash
+cd backend
+pip install -r requirements.txt
+python -m alembic upgrade head
+python scripts/seed.py
+uvicorn app.main:app --reload
+```
+
+Swagger docs are available at `http://localhost:8000/docs`.
+
+Docker setup:
+
+```bash
+cd backend
+docker compose up --build
+```
 
 ## Affiliate Compliance
 

@@ -13,4 +13,13 @@ yarn-error.log*
 pnpm-debug.log*
 *.tsbuildinfo
 dev-server.*.log
+*.log
 coverage
+__pycache__
+*.py[cod]
+.pytest_cache
+.mypy_cache
+backend/.venv
+backend/venv
+backend/.env
+backend/dealsense.db

@@ -1,0 +1,2 @@
+"""Shared automation framework primitives."""
+
