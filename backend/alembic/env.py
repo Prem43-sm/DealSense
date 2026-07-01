@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.config import get_settings
 from app.database.connection import Base
-from app.models import Deal, Price, PriceHistory, Product, Store
+from app.models import Deal, Price, PriceHistory, Product, ProductSource, Store
 
 config = context.config
 
@@ -18,7 +18,7 @@ config.set_main_option("sqlalchemy.url", settings.database_url)
 target_metadata = Base.metadata
 
 # Keep model imports referenced for Alembic autogenerate.
-_models = (Deal, Price, PriceHistory, Product, Store)
+_models = (Deal, Price, PriceHistory, Product, ProductSource, Store)
 
 
 def run_migrations_offline() -> None:

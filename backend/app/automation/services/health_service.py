@@ -1,6 +1,8 @@
 from app.automation.common.scheduler import AutomationScheduler
 from app.automation.agents.product_discovery.service import ProductDiscoveryStateStore
 from app.automation.agents.price_monitor.service import PriceMonitorStateStore
+from app.automation.services.database_service import DatabaseService
+from app.identity.service import IdentityMappingService
 
 
 class HealthService:
@@ -9,18 +11,31 @@ class HealthService:
         scheduler: AutomationScheduler,
         product_discovery_state_store: ProductDiscoveryStateStore | None = None,
         price_monitor_state_store: PriceMonitorStateStore | None = None,
+        database_service: DatabaseService | None = None,
     ) -> None:
         self.scheduler = scheduler
         self.agents = scheduler.register_all_agents()
         self.product_discovery_state_store = product_discovery_state_store or ProductDiscoveryStateStore()
         self.price_monitor_state_store = price_monitor_state_store or PriceMonitorStateStore()
+        self.database_service = database_service or DatabaseService()
 
     def status(self) -> dict[str, object]:
         return {
             "framework": "ready",
             "scheduler": self.scheduler.status(),
+            "identity_system": self._identity_health(),
             "agents": [self._agent_health(agent.health()) for agent in self.agents],
         }
+
+    def _identity_health(self) -> dict[str, object]:
+        with self.database_service.session() as db:
+            state = IdentityMappingService(db).health()
+            return {
+                "status": state.status,
+                "mapped_products": state.mapped_products,
+                "new_products": state.new_products,
+                "duplicate_prevented": state.duplicate_prevented,
+            }
 
     def _agent_health(self, health: dict[str, str]) -> dict[str, object]:
         if health["name"] == "product_discovery":

@@ -1,6 +1,6 @@
 # Product Discovery Agent
 
-Discovers new products from configured product sources and inserts them into the existing DealSense product table.
+Discovers new products from configured product sources and sends every incoming product through the identity layer.
 
 ## Scope
 
@@ -12,12 +12,12 @@ This worker only discovers products. It does not update prices, create affiliate
 Scheduler or manual API
   -> ProductDiscoveryAgent
   -> ProductDiscoveryService
-  -> ProductSource implementations
+  -> ConnectorManager
+  -> marketplace connectors
   -> Validator
-  -> Normalizer
-  -> DuplicateChecker
-  -> ProductMapper
-  -> Existing SQLAlchemy Product table
+  -> IdentityMappingService
+  -> products
+  -> product_sources
 ```
 
 ## Manual Run
@@ -42,7 +42,7 @@ The endpoint returns:
 
 ## Adding New Sources
 
-Create a class that implements `ProductSource` in `sources.py` or a dedicated source module. The source must return `SourceProduct` records with:
+Create a marketplace connector under `backend/app/connectors/providers/<provider>/`. Product Discovery reads connector `ProductData` through `ConnectorManager` and adapts it to `SourceProduct` records with:
 
 - `title`
 - `brand`
@@ -53,7 +53,7 @@ Create a class that implements `ProductSource` in `sources.py` or a dedicated so
 - `store`
 - `url`
 
-No source should scrape pages in this phase. Future integrations should use official APIs or approved feeds.
+No connector should scrape pages in this phase. Future integrations should use official APIs or approved feeds.
 
 ## Validation
 
@@ -61,11 +61,11 @@ No source should scrape pages in this phase. Future integrations should use offi
 
 ## Normalization
 
-`normalizer.py` trims whitespace, standardizes capitalization, and generates a URL-safe slug from the normalized title.
+The identity layer trims whitespace, standardizes capitalization, and generates a URL-safe slug from the normalized title.
 
 ## Duplicate Detection
 
-`duplicate_checker.py` checks the existing database for matching product title or slug. It also tracks duplicate `external_id` values within the current source batch because the current database schema intentionally has no `external_id` column.
+Product Discovery no longer inserts products directly. `IdentityMappingService` prevents duplicates through exact marketplace mappings, exact slug, normalized title, and brand plus title similarity.
 
 ## Future Roadmap
 
@@ -73,4 +73,4 @@ No source should scrape pages in this phase. Future integrations should use offi
 - Flipkart Affiliate API source
 - Cuelinks feed source
 - CSV and JSON feed sources
-- Persistent external source identity if the product schema is extended later
+- Marketplace-specific source identifiers through `product_sources`

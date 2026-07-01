@@ -21,3 +21,4 @@ class Product(Base):
     prices = relationship("Price", back_populates="product", cascade="all, delete-orphan")
     price_history = relationship("PriceHistory", back_populates="product", cascade="all, delete-orphan")
     deals = relationship("Deal", back_populates="product", cascade="all, delete-orphan")
+    sources = relationship("ProductSource", back_populates="product", cascade="all, delete-orphan")

@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import deals, prices, products
 from app.automation import api as automation_api
+from app.connectors import api as connectors_api
+from app.identity import api as identity_api
 from app.config import get_settings
 from app.logging_config import configure_logging
 from app.scheduler.jobs import create_scheduler
@@ -78,3 +80,5 @@ app.include_router(products.router)
 app.include_router(prices.router)
 app.include_router(deals.router)
 app.include_router(automation_api.router)
+app.include_router(connectors_api.router)
+app.include_router(identity_api.router)

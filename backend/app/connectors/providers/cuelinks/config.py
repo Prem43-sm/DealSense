@@ -1,0 +1,5 @@
+PROVIDER_NAME = "cuelinks"
+DISPLAY_NAME = "Cuelinks"
+EXTERNAL_PREFIX = "CL"
+PRICE_OFFSET = 1
+

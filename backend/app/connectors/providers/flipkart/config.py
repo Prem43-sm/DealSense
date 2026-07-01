@@ -1,0 +1,5 @@
+PROVIDER_NAME = "flipkart"
+DISPLAY_NAME = "Flipkart"
+EXTERNAL_PREFIX = "FK"
+PRICE_OFFSET = 1
+

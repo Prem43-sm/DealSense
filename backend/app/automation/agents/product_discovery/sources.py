@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
-
 from pydantic import BaseModel, ConfigDict
+
+from app.connectors.manager import ConnectorManager
 
 
 class SourceProduct(BaseModel):
@@ -16,45 +16,38 @@ class SourceProduct(BaseModel):
     url: str | None = None
 
 
-class ProductSource(ABC):
+class ProductSource:
     name: str
 
-    @abstractmethod
     def fetch_products(self) -> list[SourceProduct]:
         raise NotImplementedError
 
 
-class MockSource(ProductSource):
-    name = "Mock Source"
+class ConnectorProductSource(ProductSource):
+    name = "Connector Manager"
+
+    def __init__(self, connector_manager: ConnectorManager | None = None) -> None:
+        self.connector_manager = connector_manager or ConnectorManager()
 
     def fetch_products(self) -> list[SourceProduct]:
-        products = [
-            ("Lenovo LOQ RTX 4050", "Lenovo", "Gaming Laptops"),
-            ("HP Victus", "HP", "Gaming Laptops"),
-            ("ASUS TUF", "ASUS", "Gaming Laptops"),
-            ("Acer Nitro V", "Acer", "Gaming Laptops"),
-            ("Samsung Galaxy S25", "Samsung", "Smartphones"),
-            ("iPhone 17", "Apple", "Smartphones"),
-            ("OnePlus 14", "OnePlus", "Smartphones"),
-            ("Logitech MX Master", "Logitech", "Accessories"),
-            ("Sony WH1000XM5", "Sony", "Audio"),
-            ("Samsung 990 EVO SSD", "Samsung", "Storage"),
-        ]
-        return [
-            SourceProduct(
-                title=title,
-                brand=brand,
-                category=category,
-                description=f"{title} discovered from the mock product source.",
-                image_url=None,
-                external_id=f"mock-{index}",
-                store=self.name,
-                url=f"https://example.com/products/mock-{index}",
-            )
-            for index, (title, brand, category) in enumerate(products, start=1)
-        ]
+        products: list[SourceProduct] = []
+        for connector in self.connector_manager.all_connectors():
+            for product in connector.discover_products():
+                products.append(
+                    SourceProduct(
+                        title=product.title,
+                        brand=product.brand,
+                        category=product.category,
+                        description=product.description,
+                        image_url=product.image_url,
+                        external_id=product.external_id,
+                        store=product.provider,
+                        url=product.product_url,
+                    )
+                )
+        return products
 
 
 def get_product_sources() -> list[ProductSource]:
-    return [MockSource()]
+    return [ConnectorProductSource()]
 

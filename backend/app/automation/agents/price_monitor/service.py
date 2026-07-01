@@ -5,14 +5,14 @@ from pathlib import Path
 
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.automation.agents.price_monitor.history_writer import write_price_history
 from app.automation.agents.price_monitor.price_comparator import compare_price
 from app.automation.agents.price_monitor.price_normalizer import normalize_price
 from app.automation.agents.price_monitor.price_updater import get_current_price, update_current_price
 from app.automation.agents.price_monitor.sources import PriceSource, get_price_sources
-from app.models.product import Product
+from app.models.product_source import ProductSource as MarketplaceProductSource
 from app.services.deal_service import create_deal_if_discounted
 
 
@@ -60,14 +60,21 @@ class PriceMonitorService:
 
     def monitor_prices(self) -> PriceMonitorSummary:
         summary = PriceMonitorSummary()
-        products = list(self.db.scalars(select(Product).order_by(Product.id)))
+        product_sources = list(
+            self.db.scalars(
+                select(MarketplaceProductSource)
+                .where(MarketplaceProductSource.active.is_(True))
+                .options(selectinload(MarketplaceProductSource.product))
+                .order_by(MarketplaceProductSource.id)
+            )
+        )
 
         try:
             for source in self.sources:
                 self._log("Price source started", source=source.name)
                 source.start_run()
-                for product in products:
-                    self._check_product(source, product, summary)
+                for product_source in product_sources:
+                    self._check_product(source, product_source, summary)
                 source.finish_run()
 
             self.db.commit()
@@ -89,11 +96,11 @@ class PriceMonitorService:
     def _check_product(
         self,
         source: PriceSource,
-        product: Product,
+        product_source: MarketplaceProductSource,
         summary: PriceMonitorSummary,
     ) -> None:
         try:
-            source_price = source.fetch_price(product)
+            source_price = source.fetch_price(product_source)
             if source_price is None:
                 return
 
@@ -103,7 +110,7 @@ class PriceMonitorService:
                 summary.failed += 1
                 return
 
-            current_price = get_current_price(self.db, product.id, normalized_price.store)
+            current_price = get_current_price(self.db, product_source.product_id, normalized_price.store)
             old_price = current_price.current_price if current_price else None
             comparison = compare_price(old_price, normalized_price.price)
 
@@ -114,7 +121,7 @@ class PriceMonitorService:
             updated_price = update_current_price(self.db, normalized_price, current_price)
             write_price_history(
                 self.db,
-                product_id=product.id,
+                product_id=product_source.product_id,
                 store_id=updated_price.store_id,
                 price=normalized_price.price,
             )
@@ -124,13 +131,17 @@ class PriceMonitorService:
             if comparison.old_price is not None:
                 create_deal_if_discounted(
                     self.db,
-                    product_id=product.id,
+                    product_id=product_source.product_id,
                     old_price=comparison.old_price,
                     new_price=comparison.new_price,
                 )
         except Exception:
             summary.failed += 1
-            self._log("Price monitor product failed", product_id=product.id, product=product.title)
+            self._log(
+                "Price monitor product failed",
+                product_id=product_source.product_id,
+                source_id=product_source.id,
+            )
 
     def _write_state(self, summary: PriceMonitorSummary, status: str) -> None:
         self.state_store.write(
@@ -146,4 +157,3 @@ class PriceMonitorService:
         if self.logger is None:
             return
         self.logger.info(message, extra={f"_{key}": value for key, value in extra.items()})
-

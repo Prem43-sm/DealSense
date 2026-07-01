@@ -1,0 +1,5 @@
+PROVIDER_NAME = "reliance"
+DISPLAY_NAME = "Reliance Digital"
+EXTERNAL_PREFIX = "RDL"
+PRICE_OFFSET = 2
+

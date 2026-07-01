@@ -6,11 +6,11 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.automation.agents.product_discovery.duplicate_checker import DuplicateChecker
-from app.automation.agents.product_discovery.normalizer import normalize_product
-from app.automation.agents.product_discovery.product_mapper import map_to_product
 from app.automation.agents.product_discovery.sources import ProductSource, get_product_sources
 from app.automation.agents.product_discovery.validator import validate_source_product
+from app.identity.mapper import MappingStatus
+from app.identity.normalizer import IncomingMarketplaceProduct
+from app.identity.service import IdentityMappingService
 
 
 class DiscoverySummary(BaseModel):
@@ -56,7 +56,7 @@ class ProductDiscoveryService:
 
     def discover_products(self) -> DiscoverySummary:
         summary = DiscoverySummary()
-        duplicate_checker = DuplicateChecker(self.db)
+        identity_service = IdentityMappingService(self.db)
 
         try:
             for source in self.sources:
@@ -71,12 +71,24 @@ class ProductDiscoveryService:
                             summary.failed += 1
                             continue
 
-                        product = normalize_product(source_product)
-                        if duplicate_checker.is_duplicate(product):
+                        result = identity_service.map_product(
+                            IncomingMarketplaceProduct(
+                                title=source_product.title or "",
+                                brand=source_product.brand,
+                                category=source_product.category,
+                                description=source_product.description,
+                                image_url=source_product.image_url,
+                                source_name=source_product.store or source.name,
+                                external_product_id=source_product.external_id
+                                or f"{source.name}:{source_product.title}",
+                                product_url=source_product.url,
+                                canonical_url=source_product.url,
+                            )
+                        )
+                        if result.status == MappingStatus.EXISTING_MAPPING:
                             summary.duplicates += 1
                             continue
 
-                        self.db.add(map_to_product(product))
                         summary.inserted += 1
                     except Exception:
                         summary.failed += 1

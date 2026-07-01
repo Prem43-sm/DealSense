@@ -1,6 +1,6 @@
 # Price Monitor Agent
 
-Monitors existing DealSense products, fetches latest source prices, compares them with current stored prices, writes price history only for changed values, and reuses the existing deal service for price drops.
+Monitors active marketplace mappings for DealSense master products, fetches latest source prices, compares them with current stored prices, writes price history only for changed values, and reuses the existing deal service for price drops.
 
 ## Scope
 
@@ -12,7 +12,9 @@ This worker only monitors prices. It does not discover products, create affiliat
 Manual API or future scheduler
   -> PriceMonitorAgent
   -> PriceMonitorService
-  -> PriceSource implementations
+  -> product_sources
+  -> ConnectorManager
+  -> marketplace connectors
   -> Price normalizer
   -> Price comparator
   -> Price updater
@@ -42,13 +44,13 @@ The endpoint returns:
 
 ## Price Source Interface
 
-`sources.py` defines `PriceSource` with:
+`sources.py` defines a connector-backed `PriceSource` adapter with:
 
 - `start_run()`
-- `fetch_price(product)`
+- `fetch_price(product_source)`
 - `finish_run()`
 
-`MockPriceSource` simulates realistic price movement without scraping or external API calls. Future providers should return the same `SourcePrice` shape.
+Marketplace connectors return standardized `PriceData`, which the adapter converts into `SourcePrice`. Future providers should keep returning the common connector models.
 
 ## Comparison Process
 
