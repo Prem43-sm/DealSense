@@ -34,3 +34,17 @@ def run_price_monitor() -> dict[str, object]:
             include={"products_checked", "prices_updated", "unchanged", "failed"}
         ),
     }
+
+
+@router.get("/affiliate-manager/run")
+def run_affiliate_manager() -> dict[str, object]:
+    scheduler = AutomationScheduler()
+    agents = scheduler.register_all_agents()
+    affiliate_manager = next(agent for agent in agents if agent.name == "affiliate_manager")
+    summary = affiliate_manager.run()
+    return {
+        "status": "success",
+        "summary": summary.model_dump(
+            include={"sources_checked", "links_generated", "duplicates", "failed"}
+        ),
+    }

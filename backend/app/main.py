@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import deals, prices, products
+from app.affiliate_links import api as affiliate_links_api
 from app.automation import api as automation_api
 from app.connectors import api as connectors_api
 from app.identity import api as identity_api
@@ -79,6 +80,7 @@ def health_check() -> dict[str, str]:
 app.include_router(products.router)
 app.include_router(prices.router)
 app.include_router(deals.router)
+app.include_router(affiliate_links_api.router)
 app.include_router(automation_api.router)
 app.include_router(connectors_api.router)
 app.include_router(identity_api.router)

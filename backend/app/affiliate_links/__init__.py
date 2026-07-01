@@ -1,0 +1,2 @@
+"""Affiliate link API package."""
+

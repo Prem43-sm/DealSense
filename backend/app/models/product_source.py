@@ -33,3 +33,4 @@ class ProductSource(Base):
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
 
     product = relationship("Product", back_populates="sources")
+    affiliate_links = relationship("AffiliateLink", back_populates="product_source", cascade="all, delete-orphan")

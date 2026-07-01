@@ -80,7 +80,21 @@ class BaseMockConnector(BaseConnector):
         )
 
     def generate_affiliate_url(self, product_url: str) -> AffiliateLinkData:
-        return AffiliateLinkData(provider=self.provider_name, url=f"{product_url}?ref=dealsense")
+        if self.provider_name == "amazon":
+            url = f"{product_url}?tag=dealsenseprem-21"
+        elif self.provider_name == "flipkart":
+            url = f"{product_url}?affid=dealsense"
+        elif self.provider_name == "cuelinks":
+            url = f"https://links.cuelinks.com/mock?url={product_url}&subid=dealsense"
+        else:
+            url = f"{product_url}?partner=dealsense"
+        self.logger.info("Mock affiliate URL generated", extra={"_provider": self.provider_name})
+        return AffiliateLinkData(
+            provider=self.provider_name,
+            external_id=None,
+            url=url,
+            sponsored=True,
+        )
 
     def health_check(self) -> ConnectorHealth:
         return ConnectorHealth(provider=self.provider_name, status="ready", message="Mock connector ready")
@@ -99,4 +113,3 @@ class BaseMockConnector(BaseConnector):
         if index < 1 or index > len(MOCK_PRODUCTS):
             return None
         return index
-
