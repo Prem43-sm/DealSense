@@ -20,3 +20,17 @@ def run_product_discovery() -> dict[str, object]:
     product_discovery = next(agent for agent in agents if agent.name == "product_discovery")
     summary = product_discovery.run()
     return {"status": "success", "summary": summary.model_dump()}
+
+
+@router.get("/price-monitor/run")
+def run_price_monitor() -> dict[str, object]:
+    scheduler = AutomationScheduler()
+    agents = scheduler.register_all_agents()
+    price_monitor = next(agent for agent in agents if agent.name == "price_monitor")
+    summary = price_monitor.run()
+    return {
+        "status": "success",
+        "summary": summary.model_dump(
+            include={"products_checked", "prices_updated", "unchanged", "failed"}
+        ),
+    }
