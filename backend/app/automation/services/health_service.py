@@ -2,6 +2,7 @@ from app.automation.common.scheduler import AutomationScheduler
 from app.automation.agents.product_discovery.service import ProductDiscoveryStateStore
 from app.automation.agents.price_monitor.service import PriceMonitorStateStore
 from app.automation.agents.affiliate_manager.service import AffiliateManagerStateStore
+from app.automation.agents.availability_checker.service import AvailabilityCheckerStateStore
 from app.automation.services.database_service import DatabaseService
 from app.identity.service import IdentityMappingService
 
@@ -13,6 +14,7 @@ class HealthService:
         product_discovery_state_store: ProductDiscoveryStateStore | None = None,
         price_monitor_state_store: PriceMonitorStateStore | None = None,
         affiliate_manager_state_store: AffiliateManagerStateStore | None = None,
+        availability_checker_state_store: AvailabilityCheckerStateStore | None = None,
         database_service: DatabaseService | None = None,
     ) -> None:
         self.scheduler = scheduler
@@ -20,6 +22,7 @@ class HealthService:
         self.product_discovery_state_store = product_discovery_state_store or ProductDiscoveryStateStore()
         self.price_monitor_state_store = price_monitor_state_store or PriceMonitorStateStore()
         self.affiliate_manager_state_store = affiliate_manager_state_store or AffiliateManagerStateStore()
+        self.availability_checker_state_store = availability_checker_state_store or AvailabilityCheckerStateStore()
         self.database_service = database_service or DatabaseService()
 
     def status(self) -> dict[str, object]:
@@ -68,6 +71,16 @@ class HealthService:
                 "last_run": state.last_run,
                 "links_generated": state.links_generated,
                 "validation_status": state.validation_status,
+                "status": state.status,
+            }
+
+        if health["name"] == "availability_checker":
+            state = self.availability_checker_state_store.read()
+            return {
+                **health,
+                "last_run": state.last_run,
+                "checked": state.checked,
+                "updated": state.updated,
                 "status": state.status,
             }
 

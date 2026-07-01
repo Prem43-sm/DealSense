@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
@@ -31,6 +32,8 @@ class AvailabilityData(BaseModel):
     external_id: str
     available: bool
     status: str = "unknown"
+    quantity: int | None = None
+    last_checked: datetime | None = None
 
 
 class AffiliateLinkData(BaseModel):
@@ -44,4 +47,3 @@ class ConnectorHealth(BaseModel):
     provider: str
     status: str
     message: str | None = None
-

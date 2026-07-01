@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import UTC, datetime
 
 from app.connectors.base_connector import BaseConnector
 from app.connectors.logger import get_connector_logger
@@ -72,11 +73,14 @@ class BaseMockConnector(BaseConnector):
     def get_availability(self, external_product_id: str) -> AvailabilityData | None:
         if self._index_from_external_id(external_product_id) is None:
             return None
+        status = self._availability_status()
         return AvailabilityData(
             provider=self.provider_name,
             external_id=external_product_id,
-            available=True,
-            status="in_stock",
+            available=status not in {"OUT_OF_STOCK", "DISCONTINUED"},
+            status=status,
+            quantity=self._availability_quantity(status),
+            last_checked=datetime.now(UTC),
         )
 
     def generate_affiliate_url(self, product_url: str) -> AffiliateLinkData:
@@ -113,3 +117,25 @@ class BaseMockConnector(BaseConnector):
         if index < 1 or index > len(MOCK_PRODUCTS):
             return None
         return index
+
+    def _availability_status(self) -> str:
+        statuses = {
+            "amazon": "IN_STOCK",
+            "flipkart": "LIMITED_STOCK",
+            "croma": "OUT_OF_STOCK",
+            "ajio": "PREORDER",
+            "reliance": "IN_STOCK",
+            "cuelinks": "UNKNOWN",
+        }
+        return statuses.get(self.provider_name, "UNKNOWN")
+
+    def _availability_quantity(self, status: str) -> int | None:
+        quantities = {
+            "IN_STOCK": 25,
+            "LIMITED_STOCK": 3,
+            "PREORDER": None,
+            "OUT_OF_STOCK": 0,
+            "DISCONTINUED": 0,
+            "UNKNOWN": None,
+        }
+        return quantities[status]

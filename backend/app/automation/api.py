@@ -48,3 +48,12 @@ def run_affiliate_manager() -> dict[str, object]:
             include={"sources_checked", "links_generated", "duplicates", "failed"}
         ),
     }
+
+
+@router.get("/availability/run")
+def run_availability_checker() -> dict[str, object]:
+    scheduler = AutomationScheduler()
+    agents = scheduler.register_all_agents()
+    availability_checker = next(agent for agent in agents if agent.name == "availability_checker")
+    summary = availability_checker.run()
+    return {"status": "success", "summary": summary.model_dump()}

@@ -1,0 +1,2 @@
+"""Availability API package."""
+

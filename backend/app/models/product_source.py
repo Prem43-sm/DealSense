@@ -34,3 +34,4 @@ class ProductSource(Base):
 
     product = relationship("Product", back_populates="sources")
     affiliate_links = relationship("AffiliateLink", back_populates="product_source", cascade="all, delete-orphan")
+    availability_statuses = relationship("AvailabilityStatus", back_populates="product_source", cascade="all, delete-orphan")
