@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { FeaturedDealCard } from "@/components/featured-deal-card";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { brands, categories, products, posts } from "@/lib/data";
+import type { Product } from "@/lib/types";
 
 export function ProductRail({ title, eyebrow, items = products }: { title: string; eyebrow: string; items?: typeof products }) {
   return (
@@ -21,6 +23,35 @@ export function ProductRail({ title, eyebrow, items = products }: { title: strin
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {items.slice(0, 4).map((product) => (
             <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+type FeaturedDeal = Product & {
+  availabilityLabel: string;
+  dealUrl?: string;
+  dealDisabled?: boolean;
+};
+
+export function FeaturedDealsRail({ items }: { items: FeaturedDeal[] }) {
+  return (
+    <section className="section">
+      <div className="container">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow">Curated savings</p>
+            <h2 className="mt-2 text-2xl font-bold md:text-3xl">Featured deals</h2>
+          </div>
+          <Button asChild variant="outline">
+            <Link href="/deals">View all</Link>
+          </Button>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {items.slice(0, 4).map((product) => (
+            <FeaturedDealCard key={product.id} product={product} />
           ))}
         </div>
       </div>

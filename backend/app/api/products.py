@@ -7,26 +7,34 @@ from sqlalchemy.orm import Session, selectinload
 from app.database.connection import get_db
 from app.models.price import Price
 from app.models.product import Product
-from app.schemas.product import ProductDetail, ProductRead
+from app.schemas.product import ProductDetail, ProductListRead, ProductRead
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["products"])
 
 
-@router.get("/products", response_model=list[ProductRead])
+@router.get("/products", response_model=list[ProductListRead])
 def list_products(
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
+    with_prices: bool = Query(default=False),
     db: Session = Depends(get_db),
 ) -> list[Product]:
     offset = (page - 1) * limit
-    logger.info("Listing products", extra={"_page": page, "_limit": limit})
+    logger.info("Listing products", extra={"_page": page, "_limit": limit, "_with_prices": with_prices})
+    statement = (
+        select(Product)
+        .options(selectinload(Product.prices).selectinload(Price.store))
+        .order_by(Product.created_at.desc(), Product.id.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    if with_prices:
+        statement = statement.where(Product.prices.any())
+
     return list(
         db.scalars(
-            select(Product)
-            .order_by(Product.created_at.desc(), Product.id.desc())
-            .offset(offset)
-            .limit(limit)
+            statement
         )
     )
 

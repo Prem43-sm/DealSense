@@ -45,5 +45,9 @@ class ProductPriceRead(BaseModel):
     store: StoreRead
 
 
+class ProductListRead(ProductRead):
+    prices: list[ProductPriceRead] = Field(default_factory=list)
+
+
 class ProductDetail(ProductRead):
     prices: list[ProductPriceRead] = Field(default_factory=list)
