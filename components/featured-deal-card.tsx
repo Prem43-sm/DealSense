@@ -1,8 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, ExternalLink } from "lucide-react";
+import { ProductAnalyticsBeacon } from "@/components/analytics/product-analytics-beacon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { recordAnalyticsEvent } from "@/lib/analytics";
 import { currency } from "@/lib/data";
 import type { Product } from "@/lib/types";
 
@@ -10,14 +14,22 @@ type FeaturedDeal = Product & {
   availabilityLabel: string;
   dealUrl?: string;
   dealDisabled?: boolean;
+  productSourceId?: number;
 };
 
 export function FeaturedDealCard({ product }: { product: FeaturedDeal }) {
   const best = Math.min(...product.prices.map((price) => price.price));
   const href = product.dealUrl || `/products/${product.slug}`;
+  const productId = Number(product.id);
+
+  function trackAffiliateClick() {
+    if (!product.productSourceId) return;
+    recordAnalyticsEvent("/analytics/events/affiliate-click", { product_source_id: product.productSourceId });
+  }
 
   return (
     <Card className="group overflow-hidden">
+      {Number.isFinite(productId) ? <ProductAnalyticsBeacon event="view" productId={productId} /> : null}
       <Link href={`/products/${product.slug}`} className="block">
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           <Image
@@ -57,7 +69,12 @@ export function FeaturedDealCard({ product }: { product: FeaturedDeal }) {
           {product.dealDisabled ? (
             <span>Deal unavailable</span>
           ) : (
-            <Link href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "nofollow sponsored noopener" : undefined}>
+            <Link
+              href={href}
+              target={href.startsWith("http") ? "_blank" : undefined}
+              rel={href.startsWith("http") ? "nofollow sponsored noopener" : undefined}
+              onClick={trackAffiliateClick}
+            >
               View Deal <ExternalLink className="h-4 w-4" />
             </Link>
           )}

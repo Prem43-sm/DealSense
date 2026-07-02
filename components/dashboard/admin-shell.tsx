@@ -13,6 +13,7 @@ import {
   Settings,
 } from "lucide-react";
 import type { DashboardData } from "@/types/dashboard";
+import { AnalyticsPanel } from "@/components/dashboard/analytics-panel";
 import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
 import { AutomationPanel } from "@/components/dashboard/automation-panel";
 import { ConnectorPanel } from "@/components/dashboard/connector-panel";
@@ -28,6 +29,7 @@ const nav = [
   ["Connectors", Cable],
   ["Affiliate", Link2],
   ["Availability", Activity],
+  ["Analytics", Activity],
   ["Logs", ScrollText],
   ["Settings", Settings],
   ["Future AI", BrainCircuit],
@@ -75,6 +77,7 @@ export function AdminShell({ data }: { data: DashboardData }) {
             <ConnectorPanel connectors={data.connectors.connectors} />
             <AffiliatePanel data={data.affiliate} />
             <AvailabilityPanel data={data.availability} />
+            <AnalyticsPanel data={data.analytics} />
             <LogsPanel logs={data.summary.recent_logs} />
           </div>
         </section>
@@ -82,4 +85,3 @@ export function AdminShell({ data }: { data: DashboardData }) {
     </div>
   );
 }
-

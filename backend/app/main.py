@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import deals, prices, products
 from app.affiliate_links import api as affiliate_links_api
+from app.analytics import api as analytics_api
 from app.automation import api as automation_api
 from app.availability import api as availability_api
 from app.connectors import api as connectors_api
@@ -83,6 +84,7 @@ app.include_router(products.router)
 app.include_router(prices.router)
 app.include_router(deals.router)
 app.include_router(affiliate_links_api.router)
+app.include_router(analytics_api.router)
 app.include_router(availability_api.router)
 app.include_router(automation_api.router)
 app.include_router(connectors_api.router)

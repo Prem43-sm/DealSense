@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Bell, Heart, Star } from "lucide-react";
+import { ProductAnalyticsBeacon } from "@/components/analytics/product-analytics-beacon";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
+      <ProductAnalyticsBeacon event="detail-visit-by-slug" slug={product.slug} />
       <Breadcrumbs items={[{ label: "Deals", href: "/deals" }, { label: product.name }]} />
       <script
         type="application/ld+json"

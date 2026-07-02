@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ProductCard } from "@/components/product-card";
 import { SearchBox } from "@/components/search-box";
+import { recordSearchQuery } from "@/lib/analytics";
 import { products } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -12,6 +13,9 @@ export const metadata: Metadata = {
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams;
   const query = q?.toLowerCase() ?? "";
+  if (query) {
+    await recordSearchQuery(query);
+  }
   const results = query
     ? products.filter((product) =>
         [product.name, product.description, product.brand, product.category, ...product.tags].join(" ").toLowerCase().includes(query)

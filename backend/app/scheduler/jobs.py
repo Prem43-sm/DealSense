@@ -3,6 +3,7 @@ import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
+from app.analytics.service import AnalyticsService
 from app.collectors import fetch_amazon_prices, fetch_cuelinks_prices, fetch_flipkart_prices
 from app.config import get_settings
 from app.database.connection import SessionLocal
@@ -48,6 +49,21 @@ def run_price_refresh() -> int:
     except Exception:
         db.rollback()
         logger.exception("Price refresh failed")
+        raise
+    finally:
+        db.close()
+
+
+def run_analytics_score_recalculation() -> int:
+    db = SessionLocal()
+    try:
+        result = AnalyticsService(db).recalculate_scores()
+        records_updated = int(result["records_updated"])
+        logger.info("Analytics score recalculation completed", extra={"_records_updated": records_updated})
+        return records_updated
+    except Exception:
+        db.rollback()
+        logger.exception("Analytics score recalculation failed")
         raise
     finally:
         db.close()

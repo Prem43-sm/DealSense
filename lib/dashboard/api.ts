@@ -13,7 +13,7 @@ async function fetchJson<T>(path: string, fallback: T): Promise<T> {
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
-  const [summary, automation, connectors, products, affiliate, availability] = await Promise.all([
+  const [summary, automation, connectors, products, affiliate, availability, analytics] = await Promise.all([
     fetchJson("/dashboard/summary", {
       products: 0,
       price_records: 0,
@@ -48,9 +48,21 @@ export async function getDashboardData(): Promise<DashboardData> {
       unknown: 0,
       latest: [],
     }),
+    fetchJson("/analytics/dashboard", {
+      views_today: 0,
+      searches_today: 0,
+      affiliate_clicks: 0,
+      wishlist_adds: 0,
+      ctr: 0,
+      top_product: null,
+      top_products: [],
+      top_searches: [],
+      top_affiliate_clicks: [],
+      most_viewed: [],
+    }),
   ]);
 
-  return { summary, automation, connectors, products, affiliate, availability };
+  return { summary, automation, connectors, products, affiliate, availability, analytics };
 }
 
 export async function callDashboardAction(path: string) {
@@ -58,4 +70,3 @@ export async function callDashboardAction(path: string) {
   if (!response.ok) throw new Error(`Request failed with ${response.status}`);
   return response.json();
 }
-

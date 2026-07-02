@@ -50,6 +50,7 @@ type FeaturedDeal = Product & {
   availabilityLabel: string;
   dealUrl?: string;
   dealDisabled?: boolean;
+  productSourceId?: number;
 };
 
 async function getFeaturedDeals(): Promise<FeaturedDeal[]> {
@@ -86,6 +87,7 @@ function mapBackendProduct(product: BackendProduct): FeaturedDeal | null {
     availabilityLabel: inStock ? "In stock" : "Unavailable",
     dealUrl: best.affiliate_url && best.affiliate_url !== "#" ? best.affiliate_url : undefined,
     dealDisabled: !best.affiliate_url || best.affiliate_url === "#",
+    productSourceId: product.sources?.[0]?.id,
     prices: sortedPrices.map((price) => ({
       merchant: price.store?.name ?? "Marketplace",
       price: Number(price.current_price),

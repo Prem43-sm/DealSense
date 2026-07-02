@@ -34,6 +34,7 @@ type FeaturedDeal = Product & {
   availabilityLabel: string;
   dealUrl?: string;
   dealDisabled?: boolean;
+  productSourceId?: number;
 };
 
 export function FeaturedDealsRail({ items }: { items: FeaturedDeal[] }) {

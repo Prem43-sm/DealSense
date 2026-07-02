@@ -15,6 +15,13 @@ export type BackendProductPrice = {
   };
 };
 
+export type BackendProductSource = {
+  id: number;
+  source_name: string;
+  external_product_id: string;
+  product_url?: string | null;
+};
+
 export type BackendProduct = {
   id: number;
   title: string;
@@ -25,6 +32,7 @@ export type BackendProduct = {
   description?: string | null;
   created_at: string;
   prices?: BackendProductPrice[];
+  sources?: BackendProductSource[];
 };
 
 export async function getProducts(): Promise<BackendProduct[]> {

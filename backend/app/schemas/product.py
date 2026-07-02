@@ -45,9 +45,20 @@ class ProductPriceRead(BaseModel):
     store: StoreRead
 
 
+class ProductSourceRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    source_name: str
+    external_product_id: str
+    product_url: str | None = None
+
+
 class ProductListRead(ProductRead):
     prices: list[ProductPriceRead] = Field(default_factory=list)
+    sources: list[ProductSourceRead] = Field(default_factory=list)
 
 
 class ProductDetail(ProductRead):
     prices: list[ProductPriceRead] = Field(default_factory=list)
+    sources: list[ProductSourceRead] = Field(default_factory=list)

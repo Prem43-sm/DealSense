@@ -24,6 +24,7 @@ def list_products(
     logger.info("Listing products", extra={"_page": page, "_limit": limit, "_with_prices": with_prices})
     statement = (
         select(Product)
+        .options(selectinload(Product.sources))
         .options(selectinload(Product.prices).selectinload(Price.store))
         .order_by(Product.created_at.desc(), Product.id.desc())
         .offset(offset)
@@ -44,6 +45,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)) -> Product:
     product = db.scalar(
         select(Product)
         .where(Product.id == product_id)
+        .options(selectinload(Product.sources))
         .options(selectinload(Product.prices).selectinload(Price.store))
     )
     if product is None:

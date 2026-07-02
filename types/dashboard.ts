@@ -64,6 +64,31 @@ export type AvailabilityOverview = {
   }[];
 };
 
+export type AnalyticsProduct = {
+  product_id: number;
+  title: string;
+  views: number;
+  searches: number;
+  affiliate_clicks: number;
+  wishlist_adds: number;
+  compare_adds: number;
+  detail_page_visits: number;
+  score: number;
+};
+
+export type AnalyticsOverview = {
+  views_today: number;
+  searches_today: number;
+  affiliate_clicks: number;
+  wishlist_adds: number;
+  ctr: number;
+  top_product: string | null;
+  top_products: AnalyticsProduct[];
+  top_searches: AnalyticsProduct[];
+  top_affiliate_clicks: AnalyticsProduct[];
+  most_viewed: AnalyticsProduct[];
+};
+
 export type DashboardData = {
   summary: DashboardSummary;
   automation: { agents: AutomationAgent[] };
@@ -71,5 +96,5 @@ export type DashboardData = {
   products: ProductOverview;
   affiliate: AffiliateOverview;
   availability: AvailabilityOverview;
+  analytics: AnalyticsOverview;
 };
-
