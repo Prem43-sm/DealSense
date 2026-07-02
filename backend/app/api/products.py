@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.database.connection import get_db
 from app.models.price import Price
 from app.models.product import Product
+from app.models.product_source import ProductSource
 from app.schemas.product import ProductDetail, ProductListRead, ProductRead
 
 logger = logging.getLogger(__name__)
@@ -40,12 +41,17 @@ def list_products(
     )
 
 
-@router.get("/products/{product_id}", response_model=ProductDetail)
-def get_product(product_id: int, db: Session = Depends(get_db)) -> Product:
+@router.get("/products/{identifier}", response_model=ProductDetail)
+def get_product(identifier: str, db: Session = Depends(get_db)) -> Product:
+    clause = Product.id == int(identifier) if identifier.isdigit() else Product.slug == identifier
     product = db.scalar(
         select(Product)
-        .where(Product.id == product_id)
-        .options(selectinload(Product.sources))
+        .where(clause)
+        .options(
+            selectinload(Product.sources).selectinload(ProductSource.affiliate_links),
+            selectinload(Product.sources).selectinload(ProductSource.availability_statuses),
+            selectinload(Product.analytics),
+        )
         .options(selectinload(Product.prices).selectinload(Price.store))
     )
     if product is None:

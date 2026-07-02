@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
@@ -54,6 +54,49 @@ class ProductSourceRead(BaseModel):
     product_url: str | None = None
 
 
+class AffiliateLinkRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    provider: str
+    affiliate_url: str
+    short_url: str | None = None
+    tracking_id: str | None = None
+    status: str
+    click_count: int
+    last_generated: datetime
+
+
+class AvailabilityStatusRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    provider: str
+    status: str
+    quantity: int | None = None
+    last_checked: datetime
+    last_changed: datetime
+
+
+class ProductAnalyticsRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    date: date
+    views: int
+    searches: int
+    affiliate_clicks: int
+    wishlist_adds: int
+    compare_adds: int
+    detail_page_visits: int
+    score: int
+
+
+class ProductSourceDetailRead(ProductSourceRead):
+    affiliate_links: list[AffiliateLinkRead] = Field(default_factory=list)
+    availability_statuses: list[AvailabilityStatusRead] = Field(default_factory=list)
+
+
 class ProductListRead(ProductRead):
     prices: list[ProductPriceRead] = Field(default_factory=list)
     sources: list[ProductSourceRead] = Field(default_factory=list)
@@ -61,4 +104,6 @@ class ProductListRead(ProductRead):
 
 class ProductDetail(ProductRead):
     prices: list[ProductPriceRead] = Field(default_factory=list)
-    sources: list[ProductSourceRead] = Field(default_factory=list)
+    sources: list[ProductSourceDetailRead] = Field(default_factory=list)
+    analytics: list[ProductAnalyticsRead] = Field(default_factory=list)
+    specifications: dict[str, str] = Field(default_factory=dict)
